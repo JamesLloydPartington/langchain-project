@@ -15,6 +15,12 @@ from langchain.prompts import (
 
 from pathlib import Path
 
+import logging
+
+logger = logging.getLogger(__name__)
+
+logger.setLevel(logging.INFO)
+
 
 
 load_dotenv()
@@ -86,7 +92,7 @@ class AccountCreator:
                 results[person_types[i]] = parser.parse(result)
             except Exception as e:
                 results[person_types[i]] = []
-                print(f"Error parsing result for person_type: {person_types[i]} because of error: {e}")
+                logger.warning(f"Error parsing result for person_type: {person_types[i]} because of error: {e}")
 
         return results
 
@@ -127,13 +133,13 @@ class AccountCreator:
                 results.append(parser.parse(result))
             except Exception as e:
                 index_of_failed_results.append(i)
-                print(f"Error parsing result for person: {people.people[i]} because of error: {e}")
+                logger.warning(f"Error parsing result for person: {people.people[i]} because of error: {e}")
 
         if len(index_of_failed_results) > 0 and retry_index < retires:
             failed_people = People(people=[people.people[i] for i in index_of_failed_results])
             results.extend(await AccountCreator.create_accounts(failed_people, retry_index=retry_index+1, retires=retires))
         elif len(index_of_failed_results) > 0:
-            print(f"Could not create accounts for {len(index_of_failed_results)} people")
+            logger.warning(f"Could not create accounts for {len(index_of_failed_results)} people")
 
         return results
     
@@ -206,7 +212,7 @@ class ArticleCreator:
                 results[article_types[i]] = parser.parse(result)
             except Exception as e:
                 results[article_types[i]] = []
-                print(f"Error parsing result for article_type: {article_types[i]} because of error: {e}")
+                logger.warning(f"Error parsing result for article_type: {article_types[i]} because of error: {e}")
 
         return results
     
@@ -247,13 +253,13 @@ class ArticleCreator:
                 results.append(parser.parse(result))
             except Exception as e:
                 index_of_failed_results.append(i)
-                print(f"Error parsing result for headline: {article_headlines.headlines[i]} because of error: {e}")
+                logger.warning(f"Error parsing result for headline: {article_headlines.headlines[i]} because of error: {e}")
 
         if len(index_of_failed_results) > 0 and retry_index < retires:
             failed_headlines = ArticleHeadlines(headlines=[article_headlines.headlines[i] for i in index_of_failed_results])
             results.extend(await ArticleCreator.create_articles(failed_headlines, retry_index=retry_index+1, retires=retires))
         elif len(index_of_failed_results) > 0:
-            print(f"Could not create articles for {len(index_of_failed_results)} headlines")
+            logger.warning(f"Could not create articles for {len(index_of_failed_results)} headlines")
 
         return results
     
@@ -278,11 +284,11 @@ def main():
     if not Path.joinpath(DATA_PATH, "articles").exists():
         Path.joinpath(DATA_PATH, "articles").mkdir()
 
-    # accounts = asyncio.run(AccountCreator.create_famous_people_accounts(["actors", "athletes", "musicians", "scientists", "writers"], 10))
-    # for i, account in enumerate(accounts):
-    #     # save the account to a file
-    #     with open(Path.joinpath(DATA_PATH, "accounts", f"{i}.txt"), "w") as f:
-    #         f.write(str(account))
+    accounts = asyncio.run(AccountCreator.create_famous_people_accounts(["actors", "athletes", "musicians", "scientists", "writers"], 10))
+    for i, account in enumerate(accounts):
+        # save the account to a file
+        with open(Path.joinpath(DATA_PATH, "accounts", f"{i}.txt"), "w") as f:
+            f.write(str(account))
 
     
     articles = asyncio.run(ArticleCreator.create_articles_from_types(["Physics", "AI/ML", "Quantum Computing", "Renewable Energy", "Healthcare"], 10))
