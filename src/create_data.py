@@ -12,6 +12,8 @@ from langchain.prompts import (
     ChatPromptTemplate,
     HumanMessagePromptTemplate,
 )
+from llama_index import VectorStoreIndex, SimpleDirectoryReader
+
 
 from pathlib import Path
 
@@ -32,7 +34,21 @@ if OPENAI_API_KEY is None:
 llm = ChatOpenAI(openai_api_key=OPENAI_API_KEY, model_name="gpt-4")
 
 
-DATA_PATH = Path("../data")
+PWD = Path(__file__).parent
+DATA_PATH = Path.joinpath(PWD, "../data")
+
+ACCOUNT_PATH = Path.joinpath(DATA_PATH, "accounts")
+ARTICLE_PATH = Path.joinpath(DATA_PATH, "articles")
+
+ACCOUNT_INDEX_PATH = Path.joinpath(DATA_PATH, "account_index")
+ARTICLE_INDEX_PATH = Path.joinpath(DATA_PATH, "article_index")
+
+if not ACCOUNT_INDEX_PATH.exists():
+    ACCOUNT_INDEX_PATH.mkdir()
+
+if not ARTICLE_INDEX_PATH.exists():
+    ARTICLE_INDEX_PATH.mkdir()
+
 
 
 # first name, last name, phone number, email address, address, and biography.
@@ -289,15 +305,25 @@ def main():
     accounts = asyncio.run(AccountCreator.create_famous_people_accounts(["actors", "athletes", "musicians", "scientists", "writers"], 10))
     for i, account in enumerate(accounts):
         # save the account to a file
-        with open(Path.joinpath(DATA_PATH, "accounts", f"{i}.txt"), "w") as f:
-            f.write(str(account))
+        with open(Path.joinpath(DATA_PATH, "accounts", f"{i}.json"), "w") as f:
+            f.write(account.json())
 
+    account_documents = SimpleDirectoryReader(ACCOUNT_PATH).load_data()
+    account_index = VectorStoreIndex.from_documents(documents=account_documents)
+    account_index.storage_context.persist(persist_dir=ACCOUNT_INDEX_PATH)
     
     articles = asyncio.run(ArticleCreator.create_articles_from_types(["Physics", "AI/ML", "Quantum Computing", "Renewable Energy", "Healthcare"], 10))
     for i, article in enumerate(articles):
         # save the account to a file
-        with open(Path.joinpath(DATA_PATH, "articles", f"{i}.txt"), "w") as f:
-            f.write(str(article))
+        with open(Path.joinpath(DATA_PATH, "articles", f"{i}.json"), "w") as f:
+            f.write(article.json())
+
+
+    article_documents = SimpleDirectoryReader(ARTICLE_PATH).load_data()
+    article_index = VectorStoreIndex.from_documents(documents=article_documents)
+    article_index.storage_context.persist(persist_dir=ARTICLE_INDEX_PATH)
+
+    
 
 
 if __name__ == "__main__":
