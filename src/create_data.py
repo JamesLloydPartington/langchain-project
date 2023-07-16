@@ -13,8 +13,7 @@ from langchain.prompts import (
     HumanMessagePromptTemplate,
 )
 from llama_index import VectorStoreIndex, SimpleDirectoryReader
-
-
+import openai
 from pathlib import Path
 
 import logging
@@ -27,9 +26,11 @@ logger.setLevel(logging.INFO)
 
 load_dotenv()
 
-OPENAI_API_KEY = os.getenv("OPEN_AI_API_KEY")
+OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 if OPENAI_API_KEY is None:
-    raise Exception("OPEN_AI_API_KEY is not set")
+    raise Exception("OPENAI_API_KEY is not set")
+else:
+    openai.api_key = OPENAI_API_KEY
 
 llm = ChatOpenAI(openai_api_key=OPENAI_API_KEY, model_name="gpt-4")
 
