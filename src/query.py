@@ -16,11 +16,11 @@ from pydantic import BaseModel, Field
 from inspect import signature
 
 import uuid
+import sys
+
 
 import logging
-
-import sys
-logging.basicConfig(stream=sys.stdout, level=logging.INFO)
+# logging.basicConfig(stream=sys.stdout, level=logging.DEBUG)
 logger = logging.getLogger()
 
 from utils.custom_agent import CustomTool, Instruction, SystemOutput, HumanMessage, ChatHistory, DeterministicPlannerAndExecutor

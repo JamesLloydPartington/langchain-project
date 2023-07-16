@@ -9,7 +9,7 @@ from langchain.llms import OpenAI
 from langchain.prompts import PromptTemplate
 
 
-logging.basicConfig(stream=sys.stdout, level=logging.INFO)
+# logging.basicConfig(stream=sys.stdout, level=logging.DEBUG)
 logger = logging.getLogger()
 
 

@@ -18,9 +18,9 @@ from pathlib import Path
 
 import logging
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger()
 
-logger.setLevel(logging.INFO)
+logger.setLevel(logging.DEBUG)
 
 
 
